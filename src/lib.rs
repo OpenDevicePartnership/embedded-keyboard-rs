@@ -104,20 +104,266 @@ impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<
 
         Ok(())
     }
+
+    /// Get key states
+    pub fn get_state(&self) -> &KeyState<ROWS, COLS> {
+        &self.state
+    }
 }
 
 /// The latest state of all the keys
-struct KeyState<const ROWS: usize, const COLS: usize> {
-    state: [[u8; ROWS]; COLS],
+#[derive(Debug, PartialEq, Eq)]
+pub struct KeyState<const ROWS: usize, const COLS: usize> {
+    state: [[i8; ROWS]; COLS],
 }
 
 impl<const ROWS: usize, const COLS: usize> KeyState<ROWS, COLS> {
-    const MINIMUM: u8 = 0;
-    const MAXIMUM: u8 = 3;
+    const MINIMUM: i8 = 0;
+    const MAXIMUM: i8 = 3;
 
     fn new() -> Self {
         Self {
             state: [[0; ROWS]; COLS],
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use embedded_hal_mock::eh1::digital::{Mock, State, Transaction};
+
+    #[test]
+    fn create_keymatrix() {
+        let expectations = vec![];
+
+        let cols = [Mock::new(&expectations), Mock::new(&expectations)];
+        let rows = [Mock::new(&expectations), Mock::new(&expectations)];
+
+        let matrix = KeyMatrix::new(cols, rows);
+        let (cols, rows) = matrix.destroy();
+
+        for mut c in cols {
+            c.done();
+        }
+
+        for mut r in rows {
+            r.done();
+        }
+    }
+
+    #[test]
+    fn scan_keymatrix_no_pressed_keys() {
+        let output_expectations = vec![
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+        ];
+
+        let input_expectations = vec![
+            // First column
+            Transaction::get(State::High),
+            // Second column
+            Transaction::get(State::High),
+        ];
+
+        let cols = [
+            Mock::new(&output_expectations),
+            Mock::new(&output_expectations),
+        ];
+        let rows = [
+            Mock::new(&input_expectations),
+            Mock::new(&input_expectations),
+        ];
+
+        let mut matrix = KeyMatrix::new(cols, rows);
+
+        let result = matrix.scan_matrix();
+        assert!(result.is_ok());
+        let state = matrix.get_state();
+        dbg!(state);
+
+        let (cols, rows) = matrix.destroy();
+
+        for mut c in cols {
+            c.done();
+        }
+
+        for mut r in rows {
+            r.done();
+        }
+    }
+
+    #[test]
+    fn scan_keymatrix_pressed_keys() {
+        let output_expectations = vec![
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+        ];
+
+        let input_expectations = vec![
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+        ];
+
+        let cols = [
+            Mock::new(&output_expectations),
+            Mock::new(&output_expectations),
+        ];
+        let rows = [
+            Mock::new(&input_expectations),
+            Mock::new(&input_expectations),
+        ];
+
+        let mut matrix = KeyMatrix::new(cols, rows);
+
+        let result = matrix.scan_matrix();
+        assert!(result.is_ok());
+
+        let state = matrix.get_state();
+        assert_eq!(
+            state,
+            &KeyState {
+                state: [[0, 0], [1, 1]]
+            }
+        );
+
+        let (cols, rows) = matrix.destroy();
+
+        for mut c in cols {
+            c.done();
+        }
+
+        for mut r in rows {
+            r.done();
+        }
+    }
+
+    #[test]
+    fn scan_keymatrix_pressed_keys_not_more_than_maximum() {
+        let output_expectations = vec![
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
+        ];
+
+        let input_expectations = vec![
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
+        ];
+
+        let cols = [
+            Mock::new(&output_expectations),
+            Mock::new(&output_expectations),
+        ];
+        let rows = [
+            Mock::new(&input_expectations),
+            Mock::new(&input_expectations),
+        ];
+
+        let mut matrix = KeyMatrix::new(cols, rows);
+
+        for _ in 0..10 {
+            let result = matrix.scan_matrix();
+            assert!(result.is_ok());
+        }
+
+        let state = matrix.get_state();
+        assert_eq!(
+            state,
+            &KeyState {
+                state: [[0, 0], [3, 3]]
+            }
+        );
+
+        let (cols, rows) = matrix.destroy();
+
+        for mut c in cols {
+            c.done();
+        }
+
+        for mut r in rows {
+            r.done();
         }
     }
 }
