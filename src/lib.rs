@@ -57,16 +57,11 @@ pub struct KeyMap<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPi
     cols: [O; COLS],
 }
 
-/// The latest state of all the keys
-pub struct KeyState<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> {
-    rows: [I; ROWS],
-    cols: [O; COLS],
-}
-
 /// Matrix of [`InputPin`]s and [`OutputPin`]s describing a keyboard
 pub struct KeyMatrix<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> {
     rows: KeyRows<ROWS, I>,
     cols: KeyColumns<COLS, O>,
+    state: KeyState<ROWS, COLS>,
 }
 
 impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<ROWS, COLS, I, O> {
@@ -75,13 +70,14 @@ impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<
         Self {
             cols: KeyColumns::new(cols),
             rows: KeyRows::new(rows),
+            state: KeyState::new(),
         }
     }
 }
 
 impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<ROWS, COLS, I, O> {
     /// Scan the current state of the key matrix.
-    pub fn scan_matrix(&mut self) -> Result<KeyState<ROWS, COLS, I, O>> {
+    pub fn scan_matrix(&mut self) -> Result<()> {
         // iterate over columns, enabling each along the way, then check the
         // state of each row by mapping each row to its current state.
 
@@ -90,14 +86,39 @@ impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<
 
             // check each row
             for row in 0..ROWS {
+                let mut current = self.state.state[col][row];
+
                 if self.rows.get_row(row)? {
-                    todo!()
+                    current += 1;
+                } else {
+                    current -= 1;
                 }
+
+                self.state.state[col][row] = current.clamp(
+                    KeyState::<ROWS, COLS>::MINIMUM,
+                    KeyState::<ROWS, COLS>::MAXIMUM,
+                );
             }
 
             self.cols.disable_column(col)?;
         }
 
-        todo!()
+        Ok(())
+    }
+}
+
+/// The latest state of all the keys
+struct KeyState<const ROWS: usize, const COLS: usize> {
+    state: [[u8; ROWS]; COLS],
+}
+
+impl<const ROWS: usize, const COLS: usize> KeyState<ROWS, COLS> {
+    const MINIMUM: u8 = 0;
+    const MAXIMUM: u8 = 3;
+
+    fn new() -> Self {
+        Self {
+            state: [[0; ROWS]; COLS],
+        }
     }
 }
