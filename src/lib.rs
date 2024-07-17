@@ -8,6 +8,12 @@
 
 use embedded_hal::digital::{InputPin, OutputPin};
 
+mod cols;
+mod rows;
+mod state;
+
+use {cols::*, rows::*, state::*};
+
 /// Result type alias
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -15,40 +21,6 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     /// Unknown errors
     Unknown,
-}
-
-/// A representation of a column of keys
-pub struct KeyColumns<const COLS: usize, O: OutputPin> {
-    pins: [O; COLS],
-}
-
-impl<const COLS: usize, O: OutputPin> KeyColumns<COLS, O> {
-    fn new(pins: [O; COLS]) -> Self {
-        Self { pins }
-    }
-
-    fn enable_column(&mut self, column: usize) -> Result<()> {
-        self.pins[column].set_high().map_err(|_| Error::Unknown)
-    }
-
-    fn disable_column(&mut self, column: usize) -> Result<()> {
-        self.pins[column].set_low().map_err(|_| Error::Unknown)
-    }
-}
-
-/// A representation of a row of keys
-pub struct KeyRows<const ROWS: usize, I: InputPin> {
-    pins: [I; ROWS],
-}
-
-impl<const ROWS: usize, I: InputPin> KeyRows<ROWS, I> {
-    fn new(pins: [I; ROWS]) -> Self {
-        Self { pins }
-    }
-
-    fn get_row(&mut self, row: usize) -> Result<bool> {
-        self.pins[row].is_high().map_err(|_| Error::Unknown)
-    }
 }
 
 /// Matrix of [`InputPin`]s and [`OutputPin`]s describing a keyboard
@@ -108,23 +80,6 @@ impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<
     /// Get key states
     pub fn get_state(&self) -> &KeyState<ROWS, COLS> {
         &self.state
-    }
-}
-
-/// The latest state of all the keys
-#[derive(Debug, PartialEq, Eq)]
-pub struct KeyState<const ROWS: usize, const COLS: usize> {
-    state: [[i8; ROWS]; COLS],
-}
-
-impl<const ROWS: usize, const COLS: usize> KeyState<ROWS, COLS> {
-    const MINIMUM: i8 = 0;
-    const MAXIMUM: i8 = 3;
-
-    fn new() -> Self {
-        Self {
-            state: [[0; ROWS]; COLS],
-        }
     }
 }
 
