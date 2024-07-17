@@ -19,9 +19,7 @@ embedded-hal = "1.0.0"
 defmt = ["dep:defmt"]
 
 [dev-dependencies]
-assert_approx_eq = "1.1.0"
 embedded-hal-mock = { version = "0.11.1", features = ["embedded-hal-async"] }
-tokio = { version = "1.37.0", features = [ "rt", "macros" ] }
 
 [lints.rust]
 unsafe_code = "forbid"
