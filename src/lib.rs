@@ -51,12 +51,6 @@ impl<const ROWS: usize, I: InputPin> KeyRows<ROWS, I> {
     }
 }
 
-/// A mapper from the keymatrix to actual keycodes
-pub struct KeyMap<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> {
-    rows: [I; ROWS],
-    cols: [O; COLS],
-}
-
 /// Matrix of [`InputPin`]s and [`OutputPin`]s describing a keyboard
 pub struct KeyMatrix<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> {
     rows: KeyRows<ROWS, I>,
