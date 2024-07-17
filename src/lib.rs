@@ -9,6 +9,7 @@
 use embedded_hal::digital::{InputPin, OutputPin};
 
 mod cols;
+mod report;
 mod rows;
 mod state;
 
@@ -24,19 +25,29 @@ pub enum Error {
 }
 
 /// Matrix of [`InputPin`]s and [`OutputPin`]s describing a keyboard
-pub struct KeyMatrix<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> {
+pub struct KeyMatrix<
+    const ROWS: usize,
+    const COLS: usize,
+    const NR: usize,
+    I: InputPin,
+    O: OutputPin,
+> {
     rows: KeyRows<ROWS, I>,
     cols: KeyColumns<COLS, O>,
     state: KeyState<ROWS, COLS>,
+    _report: [u16; NR],
 }
 
-impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<ROWS, COLS, I, O> {
+impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: OutputPin>
+    KeyMatrix<ROWS, COLS, NR, I, O>
+{
     /// Instantiate a new matrix with the given rows and columns
     pub fn new(cols: [O; COLS], rows: [I; ROWS]) -> Self {
         Self {
             cols: KeyColumns::new(cols),
             rows: KeyRows::new(rows),
             state: KeyState::new(),
+            _report: [0; NR],
         }
     }
 
@@ -46,7 +57,9 @@ impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<
     }
 }
 
-impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<ROWS, COLS, I, O> {
+impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: OutputPin>
+    KeyMatrix<ROWS, COLS, NR, I, O>
+{
     /// Scan the current state of the key matrix.
     pub fn scan_matrix(&mut self) -> Result<()> {
         // iterate over columns, enabling each along the way, then check the
@@ -95,7 +108,7 @@ mod tests {
         let cols = [Mock::new(&expectations), Mock::new(&expectations)];
         let rows = [Mock::new(&expectations), Mock::new(&expectations)];
 
-        let matrix = KeyMatrix::new(cols, rows);
+        let matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
         let (cols, rows) = matrix.destroy();
 
         for mut c in cols {
@@ -132,7 +145,7 @@ mod tests {
             Mock::new(&input_expectations),
         ];
 
-        let mut matrix = KeyMatrix::new(cols, rows);
+        let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
 
         let result = matrix.scan_matrix();
         assert!(result.is_ok());
@@ -175,7 +188,7 @@ mod tests {
             Mock::new(&input_expectations),
         ];
 
-        let mut matrix = KeyMatrix::new(cols, rows);
+        let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
 
         let result = matrix.scan_matrix();
         assert!(result.is_ok());
@@ -296,7 +309,7 @@ mod tests {
             Mock::new(&input_expectations),
         ];
 
-        let mut matrix = KeyMatrix::new(cols, rows);
+        let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
 
         for _ in 0..10 {
             let result = matrix.scan_matrix();
