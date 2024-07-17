@@ -67,6 +67,11 @@ impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<
             state: KeyState::new(),
         }
     }
+
+    /// Destroys this instance and returns cols and rows arrays back to the caller.
+    pub fn destroy(self) -> ([O; COLS], [I; ROWS]) {
+        (self.cols.pins, self.rows.pins)
+    }
 }
 
 impl<const ROWS: usize, const COLS: usize, I: InputPin, O: OutputPin> KeyMatrix<ROWS, COLS, I, O> {
