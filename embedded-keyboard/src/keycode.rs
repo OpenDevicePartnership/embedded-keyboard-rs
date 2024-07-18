@@ -232,7 +232,6 @@ pub enum Keycode {
     Kp_MemorySubtract = 0x00d4,
     Kp_MemoryMultiply = 0x00d5,
     Kp_MemoryDivide = 0x00d6,
-    /// ±
     Kp_PlusMinus = 0x00d7,
     Kp_Clear = 0x00d8,
     Kp_ClearEntry = 0x00d9,
