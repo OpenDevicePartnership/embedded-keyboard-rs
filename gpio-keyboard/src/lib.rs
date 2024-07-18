@@ -38,18 +38,18 @@ impl Error for KeyboardError {
 pub struct KeyMatrix<
     const ROWS: usize,
     const COLS: usize,
-    const NR: usize,
+    const NKRO: usize,
     I: InputPin,
     O: OutputPin,
 > {
     rows: [I; ROWS],
     cols: [O; COLS],
     keys: [[Key; ROWS]; COLS],
-    _report: [u16; NR],
+    _report: [u16; NKRO],
 }
 
-impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: OutputPin>
-    KeyMatrix<ROWS, COLS, NR, I, O>
+impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: OutputPin>
+    KeyMatrix<ROWS, COLS, NKRO, I, O>
 {
     /// Instantiate a new matrix with the given rows and columns
     pub fn new(cols: [O; COLS], rows: [I; ROWS]) -> Self {
@@ -57,7 +57,7 @@ impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: Outp
             cols,
             rows,
             keys: [[Key::new(); ROWS]; COLS],
-            _report: [0; NR],
+            _report: [0; NKRO],
         }
     }
 
@@ -67,14 +67,14 @@ impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: Outp
     }
 }
 
-impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: OutputPin> ErrorType
-    for KeyMatrix<ROWS, COLS, NR, I, O>
+impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: OutputPin> ErrorType
+    for KeyMatrix<ROWS, COLS, NKRO, I, O>
 {
     type Error = KeyboardError;
 }
 
-impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: OutputPin> Keyboard
-    for KeyMatrix<ROWS, COLS, NR, I, O>
+impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: OutputPin> Keyboard
+    for KeyMatrix<ROWS, COLS, NKRO, I, O>
 {
     /// Scan the current state of the key matrix.
     fn scan(&mut self) -> Result<()> {
