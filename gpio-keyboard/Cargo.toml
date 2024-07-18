@@ -1,0 +1,36 @@
+[package]
+name = "embedded-keymatrix"
+description = "Keyboard Matrix Driver for embedded-systems"
+readme = "README.md"
+keywords = ["keyboard", "keymatrix", "key scanning", "embedded-hal", "embedded-hal-driver", "no-std"]
+categories = ["embedded", "hardware-support", "no-std"]
+documentation = "https://docs.rs/gpio-keyboard"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+defmt = { version = "0.3.8", optional = true }
+embedded-hal.workspace = true
+embedded-keyboard = "0.1.0"
+
+[dev-dependencies]
+embedded-hal-mock.workspace = true
+itertools.workspace = true
+
+[features]
+defmt = ["dep:defmt"]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "forbid"
+
+[lints.clippy]
+correctness = "forbid"
+suspicious = "forbid"
+perf = "forbid"
+style = "forbid"
+pedantic = "forbid"

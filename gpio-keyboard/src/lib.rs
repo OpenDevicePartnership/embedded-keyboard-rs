@@ -3,17 +3,18 @@
 //! traits. Specifically `Input` and `Output`, with an optional need for
 //! `DelayNs` if the `debounce` feature is enabled.
 
-#![doc(html_root_url = "https://docs.rs/embedded-keymatrix/latest")]
+#![doc(html_root_url = "https://docs.rs/gpio-keyboard/latest")]
 #![cfg_attr(not(test), no_std)]
 
 use embedded_hal::digital::{InputPin, OutputPin};
+use embedded_keyboard::{Error, ErrorKind, ErrorType, Keyboard};
 
 /// Result type alias
-pub type Result<T> = core::result::Result<T, Error>;
+pub type Result<T> = core::result::Result<T, KeyboardError>;
 
 /// Errors produced by this crate
 #[derive(Debug, PartialEq, Eq)]
-pub enum Error {
+pub enum KeyboardError {
     /// Unable to set pin high
     SetColumnHigh,
 
@@ -25,6 +26,12 @@ pub enum Error {
 
     /// Some other error occurred.
     Other,
+}
+
+impl Error for KeyboardError {
+    fn kind(&self) -> ErrorKind {
+        ErrorKind::Other
+    }
 }
 
 /// Matrix of [`InputPin`]s and [`OutputPin`]s describing a keyboard
@@ -60,25 +67,31 @@ impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: Outp
     }
 }
 
-impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: OutputPin>
-    KeyMatrix<ROWS, COLS, NR, I, O>
+impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: OutputPin> ErrorType
+    for KeyMatrix<ROWS, COLS, NR, I, O>
+{
+    type Error = KeyboardError;
+}
+
+impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: OutputPin> Keyboard
+    for KeyMatrix<ROWS, COLS, NR, I, O>
 {
     /// Scan the current state of the key matrix.
-    pub fn scan(&mut self) -> Result<()> {
+    fn scan(&mut self) -> Result<()> {
         // iterate over columns, enabling each along the way, then check the
         // state of each row by mapping each row to its current state.
 
         for (x, col) in self.cols.iter_mut().enumerate() {
-            col.set_high().map_err(|_| Error::SetColumnHigh)?;
+            col.set_high().map_err(|_| KeyboardError::SetColumnHigh)?;
 
             // check each row
             for (y, row) in self.rows.iter_mut().enumerate() {
                 let key = self.keys.get_mut(x).unwrap().get_mut(y).unwrap();
-                let state = row.is_high().map_err(|_| Error::GetRow)?;
+                let state = row.is_high().map_err(|_| KeyboardError::GetRow)?;
                 key.update(state);
             }
 
-            col.set_low().map_err(|_| Error::SetColumnLow)?;
+            col.set_low().map_err(|_| KeyboardError::SetColumnLow)?;
         }
 
         Ok(())
@@ -449,7 +462,7 @@ mod tests {
         let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
         let result = matrix.scan();
         assert!(result.is_err());
-        assert_eq!(result, Err(Error::SetColumnHigh));
+        assert_eq!(result, Err(KeyboardError::SetColumnHigh));
 
         let (cols, rows) = matrix.destroy();
 
@@ -482,7 +495,7 @@ mod tests {
         let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
         let result = matrix.scan();
         assert!(result.is_err());
-        assert_eq!(result, Err(Error::GetRow));
+        assert_eq!(result, Err(KeyboardError::GetRow));
 
         let (cols, rows) = matrix.destroy();
 
@@ -520,7 +533,7 @@ mod tests {
         let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
         let result = matrix.scan();
         assert!(result.is_err());
-        assert_eq!(result, Err(Error::SetColumnLow));
+        assert_eq!(result, Err(KeyboardError::SetColumnLow));
 
         let (cols, rows) = matrix.destroy();
 
