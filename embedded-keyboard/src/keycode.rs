@@ -3,6 +3,7 @@
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u16)]
 #[allow(non_camel_case_types)]
+#[non_exhaustive]
 pub enum Keycode {
     NoEvent = 0x0000,
     ErrorRollOver = 0x0001,
