@@ -12,9 +12,19 @@ use embedded_hal::digital::{InputPin, OutputPin};
 pub type Result<T> = core::result::Result<T, Error>;
 
 /// Errors produced by this crate
+#[derive(Debug, PartialEq, Eq)]
 pub enum Error {
-    /// Unknown errors
-    Unknown,
+    /// Unable to set pin high
+    SetColumnHigh,
+
+    /// Unable to set pin low
+    SetColumnLow,
+
+    /// Unable to read row state
+    GetRow,
+
+    /// Some other error occurred.
+    Other,
 }
 
 /// Matrix of [`InputPin`]s and [`OutputPin`]s describing a keyboard
@@ -59,16 +69,16 @@ impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: Outp
         // state of each row by mapping each row to its current state.
 
         for (x, col) in self.cols.iter_mut().enumerate() {
-            col.set_high().map_err(|_| Error::Unknown)?;
+            col.set_high().map_err(|_| Error::SetColumnHigh)?;
 
             // check each row
             for (y, row) in self.rows.iter_mut().enumerate() {
                 let key = self.keys.get_mut(x).unwrap().get_mut(y).unwrap();
-                let state = row.is_high().map_err(|_| Error::Unknown)?;
+                let state = row.is_high().map_err(|_| Error::GetRow)?;
                 key.update(state);
             }
 
-            col.set_low().map_err(|_| Error::Unknown)?;
+            col.set_low().map_err(|_| Error::SetColumnLow)?;
         }
 
         Ok(())
@@ -119,8 +129,12 @@ impl Key {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use embedded_hal_mock::eh1::digital::{Mock, State, Transaction};
+    use embedded_hal_mock::eh1::{
+        digital::{Mock, State, Transaction},
+        MockError,
+    };
     use itertools::izip;
+    use std::io::ErrorKind;
 
     #[test]
     fn key_creation() {
@@ -412,6 +426,101 @@ mod tests {
             let result = matrix.scan();
             assert!(result.is_ok());
         }
+
+        let (cols, rows) = matrix.destroy();
+
+        for mut c in cols {
+            c.done();
+        }
+
+        for mut r in rows {
+            r.done();
+        }
+    }
+
+    #[test]
+    fn error_enabling_column() {
+        let err = MockError::Io(ErrorKind::NotConnected);
+        let expectations = vec![Transaction::set(State::High).with_error(err)];
+
+        let cols = [Mock::new(&expectations), Mock::new(&vec![])];
+        let rows = [Mock::new(&vec![]), Mock::new(&vec![])];
+
+        let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
+        let result = matrix.scan();
+        assert!(result.is_err());
+        assert_eq!(result, Err(Error::SetColumnHigh));
+
+        let (cols, rows) = matrix.destroy();
+
+        for mut c in cols {
+            c.done();
+        }
+
+        for mut r in rows {
+            r.done();
+        }
+    }
+
+    #[test]
+    fn error_reading_row() {
+        let err = MockError::Io(ErrorKind::NotConnected);
+
+        let output_expectations = vec![
+            // First column
+            Transaction::set(State::High),
+        ];
+
+        let input_expectations = vec![
+            // First column
+            Transaction::get(State::Low).with_error(err),
+        ];
+
+        let cols = [Mock::new(&output_expectations), Mock::new(&vec![])];
+        let rows = [Mock::new(&input_expectations), Mock::new(&vec![])];
+
+        let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
+        let result = matrix.scan();
+        assert!(result.is_err());
+        assert_eq!(result, Err(Error::GetRow));
+
+        let (cols, rows) = matrix.destroy();
+
+        for mut c in cols {
+            c.done();
+        }
+
+        for mut r in rows {
+            r.done();
+        }
+    }
+
+    #[test]
+    fn error_disabling_column() {
+        let err = MockError::Io(ErrorKind::NotConnected);
+
+        let output_expectations = vec![
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low).with_error(err),
+        ];
+
+        let input_expectations = vec![
+            // First column
+            Transaction::get(State::High),
+        ];
+
+        let cols = [Mock::new(&output_expectations), Mock::new(&vec![])];
+        let rows = [
+            Mock::new(&input_expectations),
+            Mock::new(&input_expectations),
+        ];
+
+        let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
+        let result = matrix.scan();
+        assert!(result.is_err());
+        assert_eq!(result, Err(Error::SetColumnLow));
 
         let (cols, rows) = matrix.destroy();
 
