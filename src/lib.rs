@@ -54,7 +54,7 @@ impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: Outp
     KeyMatrix<ROWS, COLS, NR, I, O>
 {
     /// Scan the current state of the key matrix.
-    pub fn scan_matrix(&mut self) -> Result<()> {
+    pub fn scan(&mut self) -> Result<()> {
         // iterate over columns, enabling each along the way, then check the
         // state of each row by mapping each row to its current state.
 
@@ -254,7 +254,7 @@ mod tests {
 
         let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
 
-        let result = matrix.scan_matrix();
+        let result = matrix.scan();
         assert!(result.is_ok());
 
         let (cols, rows) = matrix.destroy();
@@ -295,7 +295,7 @@ mod tests {
 
         let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
 
-        let result = matrix.scan_matrix();
+        let result = matrix.scan();
         assert!(result.is_ok());
 
         let (cols, rows) = matrix.destroy();
@@ -409,7 +409,7 @@ mod tests {
         let mut matrix: KeyMatrix<2, 2, 6, _, _> = KeyMatrix::new(cols, rows);
 
         for _ in 0..10 {
-            let result = matrix.scan_matrix();
+            let result = matrix.scan();
             assert!(result.is_ok());
         }
 
