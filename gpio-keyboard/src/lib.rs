@@ -103,6 +103,7 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
 pub struct Key {
     state: i8,
     pressed: bool,
+    changed: bool,
 }
 
 impl Default for Key {
@@ -110,6 +111,7 @@ impl Default for Key {
         Self {
             state: 0,
             pressed: false,
+            changed: false,
         }
     }
 }
@@ -156,7 +158,8 @@ mod tests {
             key,
             Key {
                 state: 0,
-                pressed: false
+                pressed: false,
+                changed: false
             }
         );
     }
@@ -169,7 +172,8 @@ mod tests {
             key,
             Key {
                 state: 0,
-                pressed: false
+                pressed: false,
+                changed: false
             }
         );
 
@@ -179,7 +183,8 @@ mod tests {
             key,
             Key {
                 state: 1,
-                pressed: false
+                pressed: false,
+                changed: false
             }
         );
     }
@@ -196,7 +201,8 @@ mod tests {
             key,
             Key {
                 state: Key::MAXIMUM,
-                pressed: true
+                pressed: true,
+                changed: false
             }
         );
     }
@@ -230,6 +236,7 @@ mod tests {
                 Key {
                     state: *s,
                     pressed: *p,
+                    changed: false
                 }
             )
         }
