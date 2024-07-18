@@ -129,12 +129,20 @@ impl Key {
         current += if sample { 1 } else { -1 };
         self.state = current.clamp(Key::MINIMUM, Key::MAXIMUM);
 
+        let previous_pressed = self.pressed;
+
         self.pressed = if self.state == Key::MINIMUM {
             false
         } else if self.state == Key::MAXIMUM {
             true
         } else {
             self.pressed
+        };
+
+        self.changed = if self.pressed != previous_pressed {
+            true
+        } else {
+            false
         };
 
         self.pressed
@@ -228,15 +236,22 @@ mod tests {
             false, false, false, false, false, false, false, false, false, true, true, true, false,
             false, false, false, false, false, false,
         ];
+        let changed = [
+            false, false, false, false, false, false, false, false, false, false, false, false,
+            false, true, false, false, false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, true, false, false, false, false,
+            false, false, false, false, false, false, false, false, false, false, false, false,
+            true, false, false, true, false, false, false, false, false, false,
+        ];
 
-        for (i, s, p) in izip!(input.iter(), state.iter(), pressed.iter()) {
+        for (i, s, p, c) in izip!(input.iter(), state.iter(), pressed.iter(), changed.iter()) {
             key.update(*i);
             assert_eq!(
                 key,
                 Key {
                     state: *s,
                     pressed: *p,
-                    changed: false
+                    changed: *c
                 }
             )
         }
