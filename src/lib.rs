@@ -8,13 +8,6 @@
 
 use embedded_hal::digital::{InputPin, OutputPin};
 
-mod cols;
-mod report;
-mod rows;
-mod state;
-
-use {cols::*, rows::*, state::*};
-
 /// Result type alias
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -32,9 +25,9 @@ pub struct KeyMatrix<
     I: InputPin,
     O: OutputPin,
 > {
-    rows: KeyRows<ROWS, I>,
-    cols: KeyColumns<COLS, O>,
-    state: KeyState<ROWS, COLS>,
+    rows: [I; ROWS],
+    cols: [O; COLS],
+    keys: [[Key; ROWS]; COLS],
     _report: [u16; NR],
 }
 
@@ -44,16 +37,16 @@ impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: Outp
     /// Instantiate a new matrix with the given rows and columns
     pub fn new(cols: [O; COLS], rows: [I; ROWS]) -> Self {
         Self {
-            cols: KeyColumns::new(cols),
-            rows: KeyRows::new(rows),
-            state: KeyState::new(),
+            cols,
+            rows,
+            keys: [[Key::new(); ROWS]; COLS],
             _report: [0; NR],
         }
     }
 
     /// Destroys this instance and returns cols and rows arrays back to the caller.
     pub fn destroy(self) -> ([O; COLS], [I; ROWS]) {
-        (self.cols.pins, self.rows.pins)
+        (self.cols, self.rows)
     }
 }
 
@@ -65,34 +58,61 @@ impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: Outp
         // iterate over columns, enabling each along the way, then check the
         // state of each row by mapping each row to its current state.
 
-        for col in 0..COLS {
-            self.cols.enable_column(col)?;
+        for (x, col) in self.cols.iter_mut().enumerate() {
+            col.set_high().map_err(|_| Error::Unknown)?;
 
             // check each row
-            for row in 0..ROWS {
-                let mut current = self.state.state[col][row];
-
-                if self.rows.get_row(row)? {
-                    current += 1;
-                } else {
-                    current -= 1;
-                }
-
-                self.state.state[col][row] = current.clamp(
-                    KeyState::<ROWS, COLS>::MINIMUM,
-                    KeyState::<ROWS, COLS>::MAXIMUM,
-                );
+            for (y, row) in self.rows.iter_mut().enumerate() {
+                let key = self.keys.get_mut(x).unwrap().get_mut(y).unwrap();
+                let state = row.is_high().map_err(|_| Error::Unknown)?;
+                key.update(state);
             }
 
-            self.cols.disable_column(col)?;
+            col.set_low().map_err(|_| Error::Unknown)?;
         }
 
         Ok(())
     }
+}
 
-    /// Get key states
-    pub fn get_state(&self) -> &KeyState<ROWS, COLS> {
-        &self.state
+/// The latest state of all the keys
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Key {
+    state: i8,
+    output: bool,
+}
+
+impl Default for Key {
+    fn default() -> Self {
+        Self {
+            state: 0,
+            output: false,
+        }
+    }
+}
+
+impl Key {
+    const MINIMUM: i8 = 0;
+    const MAXIMUM: i8 = 3;
+
+    fn new() -> Self {
+        Self::default()
+    }
+
+    fn update(&mut self, sample: bool) -> bool {
+        let mut current = self.state;
+        current += if sample { 1 } else { -1 };
+        self.state = current.clamp(Key::MINIMUM, Key::MAXIMUM);
+
+        self.output = if self.state == Key::MINIMUM {
+            false
+        } else if self.state == Key::MAXIMUM {
+            true
+        } else {
+            self.output
+        };
+
+        self.output
     }
 }
 
@@ -100,6 +120,93 @@ impl<const ROWS: usize, const COLS: usize, const NR: usize, I: InputPin, O: Outp
 mod tests {
     use super::*;
     use embedded_hal_mock::eh1::digital::{Mock, State, Transaction};
+    use itertools::izip;
+
+    #[test]
+    fn key_creation() {
+        let key = Key::default();
+        assert_eq!(
+            key,
+            Key {
+                state: 0,
+                output: false
+            }
+        );
+    }
+
+    #[test]
+    fn update_state_once() {
+        let mut key = Key::default();
+        key.update(false);
+        assert_eq!(
+            key,
+            Key {
+                state: 0,
+                output: false
+            }
+        );
+
+        let mut key = Key::default();
+        key.update(true);
+        assert_eq!(
+            key,
+            Key {
+                state: 1,
+                output: false
+            }
+        );
+    }
+
+    #[test]
+    fn state_never_goes_over_maximum() {
+        let mut key = Key::default();
+
+        for _ in 0..10 {
+            key.update(true);
+        }
+
+        assert_eq!(
+            key,
+            Key {
+                state: Key::MAXIMUM,
+                output: true
+            }
+        );
+    }
+
+    #[test]
+    fn state_filters_through_integrator() {
+        let mut key = Key::default();
+        let input = [
+            false, false, false, true, true, false, true, false, false, true, true, false, true,
+            true, true, false, true, true, false, false, true, true, true, false, true, true, true,
+            true, true, false, false, false, true, false, true, false, false, true, true, false,
+            false, false, true, false, true, true, false, true, true, false, false, false, false,
+            true, true, false, false, false,
+        ];
+        let state = [
+            0, 0, 0, 1, 2, 1, 2, 1, 0, 1, 2, 1, 2, 3, 3, 2, 3, 3, 2, 1, 2, 3, 3, 2, 3, 3, 3, 3, 3,
+            2, 1, 0, 1, 0, 1, 0, 0, 1, 2, 1, 0, 0, 1, 0, 1, 2, 1, 2, 3, 2, 1, 0, 0, 1, 2, 1, 0, 0,
+        ];
+        let output = [
+            false, false, false, false, false, false, false, false, false, false, false, false,
+            false, true, true, true, true, true, true, true, true, true, true, true, true, true,
+            true, true, true, true, true, false, false, false, false, false, false, false, false,
+            false, false, false, false, false, false, false, false, false, true, true, true, false,
+            false, false, false, false, false, false,
+        ];
+
+        for (i, s, o) in izip!(input.iter(), state.iter(), output.iter()) {
+            key.update(*i);
+            assert_eq!(
+                key,
+                Key {
+                    state: *s,
+                    output: *o,
+                }
+            )
+        }
+    }
 
     #[test]
     fn create_keymatrix() {
@@ -149,8 +256,6 @@ mod tests {
 
         let result = matrix.scan_matrix();
         assert!(result.is_ok());
-        let state = matrix.get_state();
-        dbg!(state);
 
         let (cols, rows) = matrix.destroy();
 
@@ -192,14 +297,6 @@ mod tests {
 
         let result = matrix.scan_matrix();
         assert!(result.is_ok());
-
-        let state = matrix.get_state();
-        assert_eq!(
-            state,
-            &KeyState {
-                state: [[0, 0], [1, 1]]
-            }
-        );
 
         let (cols, rows) = matrix.destroy();
 
@@ -315,14 +412,6 @@ mod tests {
             let result = matrix.scan_matrix();
             assert!(result.is_ok());
         }
-
-        let state = matrix.get_state();
-        assert_eq!(
-            state,
-            &KeyState {
-                state: [[0, 0], [3, 3]]
-            }
-        );
 
         let (cols, rows) = matrix.destroy();
 
