@@ -7,7 +7,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use embedded_hal::digital::{InputPin, OutputPin};
-use embedded_keyboard::{Error, ErrorKind, ErrorType, Keyboard};
+use embedded_keyboard::{Error, ErrorKind, ErrorType, Keyboard, Keycode};
 
 /// Result type alias
 pub type Result<T> = core::result::Result<T, KeyboardError>;
@@ -45,7 +45,7 @@ pub struct KeyMatrix<
     rows: [I; ROWS],
     cols: [O; COLS],
     keys: [[Key; ROWS]; COLS],
-    _report: [u16; NKRO],
+    report: [Keycode; NKRO],
 }
 
 impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: OutputPin>
@@ -57,7 +57,7 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
             cols,
             rows,
             keys: [[Key::new(); ROWS]; COLS],
-            _report: [0; NKRO],
+            report: [Keycode::NoEvent; NKRO],
         }
     }
 
@@ -77,7 +77,7 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
     for KeyMatrix<ROWS, COLS, NKRO, I, O>
 {
     /// Scan the current state of the key matrix.
-    fn scan(&mut self) -> Result<()> {
+    fn scan(&mut self) -> Result<&[Keycode]> {
         // iterate over columns, enabling each along the way, then check the
         // state of each row by mapping each row to its current state.
 
@@ -94,7 +94,7 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
             col.set_low().map_err(|_| KeyboardError::SetColumnLow)?;
         }
 
-        Ok(())
+        Ok(&self.report[..])
     }
 }
 

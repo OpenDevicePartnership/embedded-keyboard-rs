@@ -4,6 +4,10 @@
 #![doc(html_root_url = "https://docs.rs/embedded-keyboard/latest")]
 #![cfg_attr(not(test), no_std)]
 
+mod keycode;
+
+pub use crate::keycode::Keycode;
+
 /// Keyboard error.
 pub trait Error: core::fmt::Debug {
     /// Convert error to a generic Keyboard error kind.
@@ -67,12 +71,12 @@ impl Error for core::convert::Infallible {
 }
 
 pub trait Keyboard: ErrorType {
-    fn scan(&mut self) -> Result<(), Self::Error>;
+    fn scan(&mut self) -> Result<&[Keycode], Self::Error>;
 }
 
 impl<T: Keyboard + ?Sized> Keyboard for &mut T {
     #[inline]
-    fn scan(&mut self) -> Result<(), Self::Error> {
+    fn scan(&mut self) -> Result<&[Keycode], Self::Error> {
         T::scan(self)
     }
 }
