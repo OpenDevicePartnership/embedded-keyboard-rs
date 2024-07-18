@@ -102,14 +102,14 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Key {
     state: i8,
-    output: bool,
+    pressed: bool,
 }
 
 impl Default for Key {
     fn default() -> Self {
         Self {
             state: 0,
-            output: false,
+            pressed: false,
         }
     }
 }
@@ -127,15 +127,15 @@ impl Key {
         current += if sample { 1 } else { -1 };
         self.state = current.clamp(Key::MINIMUM, Key::MAXIMUM);
 
-        self.output = if self.state == Key::MINIMUM {
+        self.pressed = if self.state == Key::MINIMUM {
             false
         } else if self.state == Key::MAXIMUM {
             true
         } else {
-            self.output
+            self.pressed
         };
 
-        self.output
+        self.pressed
     }
 }
 
@@ -156,7 +156,7 @@ mod tests {
             key,
             Key {
                 state: 0,
-                output: false
+                pressed: false
             }
         );
     }
@@ -169,7 +169,7 @@ mod tests {
             key,
             Key {
                 state: 0,
-                output: false
+                pressed: false
             }
         );
 
@@ -179,7 +179,7 @@ mod tests {
             key,
             Key {
                 state: 1,
-                output: false
+                pressed: false
             }
         );
     }
@@ -196,7 +196,7 @@ mod tests {
             key,
             Key {
                 state: Key::MAXIMUM,
-                output: true
+                pressed: true
             }
         );
     }
@@ -215,7 +215,7 @@ mod tests {
             0, 0, 0, 1, 2, 1, 2, 1, 0, 1, 2, 1, 2, 3, 3, 2, 3, 3, 2, 1, 2, 3, 3, 2, 3, 3, 3, 3, 3,
             2, 1, 0, 1, 0, 1, 0, 0, 1, 2, 1, 0, 0, 1, 0, 1, 2, 1, 2, 3, 2, 1, 0, 0, 1, 2, 1, 0, 0,
         ];
-        let output = [
+        let pressed = [
             false, false, false, false, false, false, false, false, false, false, false, false,
             false, true, true, true, true, true, true, true, true, true, true, true, true, true,
             true, true, true, true, true, false, false, false, false, false, false, false, false,
@@ -223,13 +223,13 @@ mod tests {
             false, false, false, false, false, false,
         ];
 
-        for (i, s, o) in izip!(input.iter(), state.iter(), output.iter()) {
+        for (i, s, p) in izip!(input.iter(), state.iter(), pressed.iter()) {
             key.update(*i);
             assert_eq!(
                 key,
                 Key {
                     state: *s,
-                    output: *o,
+                    pressed: *p,
                 }
             )
         }
