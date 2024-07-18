@@ -6,7 +6,7 @@
 
 /// Keyboard error.
 pub trait Error: core::fmt::Debug {
-    /// Convert error to a generic Fan error kind.
+    /// Convert error to a generic Keyboard error kind.
     ///
     /// By using this method, Keyboard errors freely defined by HAL
     /// implementations can be converted to a set of generic Keyboard
