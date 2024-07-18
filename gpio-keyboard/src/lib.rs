@@ -1,7 +1,7 @@
 //! This crate provides an abstraction over GPIO matrices for the purposes of
 //! creating keyboards and keypads. It is based on [`embedded-hal`]
-//! traits. Specifically `Input` and `Output`, with an optional need for
-//! `DelayNs` if the `debounce` feature is enabled.
+//! traits. Specifically `Input` and `Output` for managing Rows and Columns of
+//! the keyboard matrix.
 
 #![doc(html_root_url = "https://docs.rs/gpio-keyboard/latest")]
 #![cfg_attr(not(test), no_std)]
