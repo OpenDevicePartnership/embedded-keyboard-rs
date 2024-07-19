@@ -6,7 +6,7 @@
 
 mod keycode;
 
-pub use crate::keycode::Keycode;
+pub use crate::keycode::*;
 
 /// Keyboard error.
 pub trait Error: core::fmt::Debug {
@@ -71,12 +71,12 @@ impl Error for core::convert::Infallible {
 }
 
 pub trait Keyboard: ErrorType {
-    fn scan(&mut self) -> Result<&[Keycode], Self::Error>;
+    fn scan(&mut self) -> Result<&[KeyEvent], Self::Error>;
 }
 
 impl<T: Keyboard + ?Sized> Keyboard for &mut T {
     #[inline]
-    fn scan(&mut self) -> Result<&[Keycode], Self::Error> {
+    fn scan(&mut self) -> Result<&[KeyEvent], Self::Error> {
         T::scan(self)
     }
 }

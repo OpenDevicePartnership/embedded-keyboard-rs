@@ -1,9 +1,21 @@
+/// Key Events
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum KeyEvent {
+    /// No event to report
+    NoEvent,
+    /// Key change from released to pressed
+    KeyDown(KeyCode),
+    /// Key change from pressed to released
+    KeyUp(KeyCode),
+}
+
 /// Representation for all Keycodes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u16)]
 #[non_exhaustive]
-pub enum Keycode {
+pub enum KeyCode {
     NoEvent = 0x0000,
     ErrorRollOver = 0x0001,
     PostFail = 0x0002,

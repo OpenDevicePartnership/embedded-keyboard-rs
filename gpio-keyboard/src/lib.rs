@@ -7,7 +7,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use embedded_hal::digital::{InputPin, OutputPin};
-use embedded_keyboard::{Error, ErrorKind, ErrorType, Keyboard, Keycode};
+use embedded_keyboard::{Error, ErrorKind, ErrorType, KeyCode, KeyEvent, Keyboard};
 
 /// Result type alias
 pub type Result<T> = core::result::Result<T, KeyboardError>;
@@ -45,7 +45,7 @@ pub struct KeyMatrix<
     rows: [I; ROWS],
     cols: [O; COLS],
     keys: [[Key; ROWS]; COLS],
-    report: [Keycode; NKRO],
+    report: [KeyEvent; NKRO],
 }
 
 impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: OutputPin>
@@ -57,7 +57,7 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
             cols,
             rows,
             keys: [[Key::new(); ROWS]; COLS],
-            report: [Keycode::NoEvent; NKRO],
+            report: [KeyEvent::NoEvent; NKRO],
         }
     }
 
@@ -77,7 +77,7 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
     for KeyMatrix<ROWS, COLS, NKRO, I, O>
 {
     /// Scan the current state of the key matrix.
-    fn scan(&mut self) -> Result<&[Keycode]> {
+    fn scan(&mut self) -> Result<&[KeyEvent]> {
         // iterate over columns, enabling each along the way, then check the
         // state of each row by mapping each row to its current state.
 
@@ -92,6 +92,20 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
             }
 
             col.set_low().map_err(|_| KeyboardError::SetColumnLow)?;
+        }
+
+        for (i, event) in self
+            .keys
+            .iter()
+            .map(|row| row.iter().filter(|key| key.changed))
+            .flatten()
+            .map(|key| match key.pressed {
+                true => KeyEvent::KeyDown(KeyCode::KA),
+                false => KeyEvent::KeyUp(KeyCode::KA),
+            })
+            .enumerate()
+        {
+            self.report[i] = event;
         }
 
         Ok(&self.report[..])
