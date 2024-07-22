@@ -5,9 +5,24 @@ pub enum KeyEvent {
     /// No event to report
     NoEvent,
     /// Key change from released to pressed
-    KeyDown(KeyCode),
+    KeyDown(Coordinate),
     /// Key change from pressed to released
-    KeyUp(KeyCode),
+    KeyUp(Coordinate),
+}
+
+/// Key coordinates
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct Coordinate {
+    row: usize,
+    col: usize,
+}
+
+impl Coordinate {
+    /// Create a new `Coordinate' instance
+    pub fn new(row: usize, col: usize) -> Self {
+        Self { row, col }
+    }
 }
 
 /// Representation for all Keycodes.

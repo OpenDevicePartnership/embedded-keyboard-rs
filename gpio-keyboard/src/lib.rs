@@ -7,7 +7,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use embedded_hal::digital::{InputPin, OutputPin};
-use embedded_keyboard::{Error, ErrorKind, ErrorType, KeyCode, KeyEvent, Keyboard};
+use embedded_keyboard::{Coordinate, Error, ErrorKind, ErrorType, KeyEvent, Keyboard};
 
 /// Result type alias
 pub type Result<T> = core::result::Result<T, KeyboardError>;
@@ -94,18 +94,24 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
             col.set_low().map_err(|_| KeyboardError::SetColumnLow)?;
         }
 
-        for (i, event) in self
-            .keys
-            .iter()
-            .map(|row| row.iter().filter(|key| key.changed))
-            .flatten()
-            .map(|key| match key.pressed {
-                true => KeyEvent::KeyDown(KeyCode::KA),
-                false => KeyEvent::KeyUp(KeyCode::KA),
-            })
-            .enumerate()
-        {
-            self.report[i] = event;
+        let mut i = 0;
+
+        for (x, _) in self.cols.iter().enumerate() {
+            for (y, _) in self.rows.iter().enumerate() {
+                let key = self.keys.get(x).unwrap().get(y).unwrap();
+                let event = if key.pressed {
+                    KeyEvent::KeyDown(Coordinate::new(x, y))
+                } else {
+                    KeyEvent::KeyUp(Coordinate::new(x, y))
+                };
+
+                if i >= NKRO {
+                    break;
+                }
+
+                self.report[i] = event;
+                i += 1;
+            }
         }
 
         Ok(&self.report[..])
