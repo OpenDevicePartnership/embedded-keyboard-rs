@@ -12,3 +12,7 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+defmt = { version = "0.3.8", optional = true }
+
+[features]
+defmt = ["dep:defmt"]
