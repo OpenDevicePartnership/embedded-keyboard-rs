@@ -109,6 +109,10 @@ impl<const ROWS: usize, const COLS: usize, const NKRO: usize, I: InputPin, O: Ou
                     break;
                 }
 
+                if !key.changed {
+                    continue;
+                }
+
                 self.report[i] = event;
                 i += 1;
             }
@@ -421,9 +425,17 @@ mod tests {
             Transaction::set(State::High),
             // Second column
             Transaction::set(State::Low),
+            // First column
+            Transaction::set(State::High),
+            // Second column
+            Transaction::set(State::Low),
         ];
 
         let input_expectations = vec![
+            // First column
+            Transaction::get(State::Low),
+            // Second column
+            Transaction::get(State::High),
             // First column
             Transaction::get(State::Low),
             // Second column
@@ -481,6 +493,21 @@ mod tests {
             let result = matrix.scan();
             assert!(result.is_ok());
         }
+
+        let result = matrix.scan();
+        assert!(result.is_ok());
+        let report = result.unwrap();
+        assert_eq!(
+            report,
+            &[
+                KeyEvent::KeyDown(Coordinate::new(1, 0)),
+                KeyEvent::KeyDown(Coordinate::new(1, 1)),
+                KeyEvent::NoEvent,
+                KeyEvent::NoEvent,
+                KeyEvent::NoEvent,
+                KeyEvent::NoEvent
+            ]
+        );
 
         let (cols, rows) = matrix.destroy();
 
