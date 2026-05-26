@@ -1,5 +1,12 @@
 # Copilot Instructions
 
+> **See also: [`AGENTS.md`](../AGENTS.md) at the repository root.**
+> It is the canonical, full-length guide for AI coding agents
+> (workspace layout, `no_std` rules, lint profile, build/test/clippy/fmt/doc
+> commands, testing patterns, and PR etiquette). The notes below cover
+> only commit-message formatting and AI attribution; consult `AGENTS.md`
+> for everything else.
+
 ## Commit Messages
 - Subject line: capitalized, 50 characters or less, imperative mood (e.g., "Fix bug" not "Fixed bug")
 - Separate subject from body with a blank line
