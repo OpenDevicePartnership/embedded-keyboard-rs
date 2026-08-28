@@ -1,8 +1,324 @@
 
 # cargo-vet imports lock
 
-[audits.OpenDevicePartnership.audits]
+[[audits.OpenDevicePartnership.audits.autocfg]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+delta = "1.4.0 -> 1.5.0"
+notes = "No unsafe, no build.rs, no network access; delta adds edition-aware rustc probing and best-effort probe-file cleanup only. Assisted-by: copilot-cli:GPT-5.3-Codex"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/embedded-services/refs/heads/main/supply-chain/audits.toml"
 
-[audits.google.audits]
+[[audits.OpenDevicePartnership.audits.autocfg]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+delta = "1.5.0 -> 1.5.1"
+notes = "Delta 1.5.0->1.5.1: test-only refactor replacing shell wrapper script with self-contained Rust test binary. No library code changes, no unsafe, no build script. Assisted-by: GitHub Copilot:claude-opus-4.6 cargo-vet"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/embassy-npcx/refs/heads/main/supply-chain/audits.toml"
 
-[audits.mozilla.audits]
+[[audits.OpenDevicePartnership.audits.defmt]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+version = "0.3.100"
+notes = "Compatibility shim: no_std crate that re-exports defmt 1.x items for 0.3 API compatibility. No unsafe code, no build script, no powerful imports, no logic - pure pub-use re-exports. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/embedded-services/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.defmt]]
+who = "Felipe Balbi <felipe.balbi@microsoft.com>"
+criteria = "safe-to-deploy"
+version = "1.0.1"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/mcxa-pac/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.defmt]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.1 -> 1.1.0"
+notes = "Delta audit: No new unsafe code. build.rs adds xtensa-esp32s2-none-elf to no_cas list. New Format impls for core::fmt::Error and Wrapping are safe. Assisted-by: GitHub Copilot:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/embedded-services/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.defmt]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+delta = "1.1.0 -> 1.1.1"
+notes = "Reviewed version/dependency metadata and UI diagnostic updates. Runtime implementation is unchanged; defmt-macros is pinned from 1.1.0 to separately audited 1.1.1. No unsafe or ambient capability changes."
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/bq25723/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.defmt-macros]]
+who = "Felipe Balbi <felipe.balbi@microsoft.com>"
+criteria = "safe-to-deploy"
+version = "1.0.1"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/mcxa-pac/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.defmt-macros]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.1 -> 1.1.0"
+notes = "Delta: adds transparent/bound derive attrs. No unsafe. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/bq40z50/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.defmt-macros]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+delta = "1.1.0 -> 1.1.1"
+notes = "Replaced proc-macro-error2 diagnostic handling with syn::Error across proc-macro parsing and error paths. Reviewed generated-code paths and dependency changes; no unsafe code or new filesystem, network, environment, or process capabilities were introduced."
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/bq25723/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.defmt-parser]]
+who = "Felipe Balbi <felipe.balbi@microsoft.com>"
+criteria = "safe-to-deploy"
+version = "1.0.0"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/mcxa-pac/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.embedded-hal]]
+who = "Felipe Balbi <felipe.balbi@microsoft.com>"
+criteria = "safe-to-deploy"
+version = "0.2.7"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/mcxa-pac/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.embedded-hal]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+delta = "0.2.7 -> 1.0.0"
+notes = "Pure no_std trait crate. Complete API redesign for 1.0: removed nb-based traits, CAN module, all unsafe code. Only defines traits/enums/types for digital, I2C, SPI, PWM, delay. No build script, no proc macros, no powerful imports. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/embedded-services/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.embedded-hal-mock]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-run"
+delta = "0.8.0 -> 0.11.1"
+notes = "Delta: adds embedded-hal 1.x support. No unsafe, no network/fs access. Test mock infrastructure. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/bq25773/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.embedded-hal-nb]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+version = "1.0.0"
+notes = "no_std trait-only crate. No unsafe, no build script, no proc macros, no powerful imports. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/embedded-services/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.embedded-time]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-run"
+version = "0.12.1"
+notes = "Full audit: no_std embedded time library. deny(unsafe_code). No build script, no ambient capabilities. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/bq25773/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.num]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-run"
+delta = "0.4.0 -> 0.3.1"
+notes = "Downgrade delta: version and dep changes only. no_std meta-crate. No unsafe, no build script. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/bq25773/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.num-complex]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-run"
+delta = "0.4.2 -> 0.3.1"
+notes = "Downgrade delta: removes ComplexFloat trait, bytemuck support. Strict feature subset, no unsafe. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/bq25773/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.num-rational]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-run"
+delta = "0.4.1 -> 0.3.2"
+notes = "Downgrade delta: removes Default impl, ldexp helper. Pure math, no unsafe. Assisted-by: copilot-cli:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/bq25773/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.OpenDevicePartnership.audits.unicode-ident]]
+who = "Jerry Xie <jerryxie@microsoft.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.18 -> 1.0.24"
+notes = "Delta: Unicode 16->17 table data update only. No unsafe, no build.rs, no new deps. Assisted-by: GitHub Copilot:claude-opus-4.6"
+aggregated-from = "https://raw.githubusercontent.com/OpenDevicePartnership/embedded-services/refs/heads/main/supply-chain/audits.toml"
+
+[[audits.google.audits.autocfg]]
+who = "Manish Goregaokar <manishearth@google.com>"
+criteria = "safe-to-deploy"
+version = "1.4.0"
+notes = "Contains no unsafe"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.bitflags]]
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
+version = "1.3.2"
+notes = """
+Security review of earlier versions of the crate can be found at
+(Google-internal, sorry): go/image-crate-chromium-security-review
+
+The crate exposes a function marked as `unsafe`, but doesn't use any
+`unsafe` blocks (except for tests of the single `unsafe` function).  I
+think this justifies marking this crate as `ub-risk-1`.
+
+Additional review comments can be found at https://crrev.com/c/4723145/31
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.embedded-hal-mock]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-run"
+version = "0.8.0"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.nb]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-deploy"
+version = "1.0.0"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.nb]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.0 -> 0.1.3"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.nb]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.0 -> 1.1.0"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.google.audits.num-traits]]
+who = "Manish Goregaokar <manishearth@google.com>"
+criteria = "safe-to-deploy"
+version = "0.2.19"
+notes = "Contains a single line of float-to-int unsafe with decent safety comments"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.quote]]
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
+version = "1.0.35"
+notes = """
+Grepped for "unsafe", "crypt", "cipher", "fs", "net" - there were no hits
+(except for benign "net" hit in tests and "fs" hit in README.md)
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.quote]]
+who = "Adrian Taylor <adetaylor@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.35 -> 1.0.36"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.quote]]
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.36 -> 1.0.37"
+notes = """
+The delta just 1) inlines/expands `impl ToTokens` that used to be handled via
+`primitive!` macro and 2) adds `impl ToTokens` for `CStr` and `CString`.
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.quote]]
+who = "Dustin J. Mitchell <djmitche@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.37 -> 1.0.38"
+notes = "Still no unsafe"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.quote]]
+who = "Daniel Cheng <dcheng@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.38 -> 1.0.39"
+notes = "Only minor changes for clippy lints and documentation."
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.quote]]
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.39 -> 1.0.40"
+notes = """
+The delta is just a simplification of how `tokens.extend(...)` call is made.
+Still no `unsafe` anywhere.
+"""
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.unicode-ident]]
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
+version = "1.0.12"
+notes = '''
+I grepped for \"crypt\", \"cipher\", \"fs\", \"net\" - there were no hits.
+
+All two functions from the public API of this crate use `unsafe` to avoid bound
+checks for an array access.  Cross-module analysis shows that the offsets can
+be statically proven to be within array bounds.  More details can be found in
+the unsafe review CL at https://crrev.com/c/5350386.
+
+This crate has been added to Chromium in https://crrev.com/c/3891618.
+'''
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.unicode-ident]]
+who = "Dustin J. Mitchell <djmitche@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.12 -> 1.0.13"
+notes = "Lots of table updates, and tables are assumed correct with unsafe `.get_unchecked()`, so ub-risk-2 is appropriate"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.unicode-ident]]
+who = "Lukasz Anforowicz <lukasza@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.13 -> 1.0.14"
+notes = "Minimal delta in `.rs` files: new test assertions + doc changes."
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.unicode-ident]]
+who = "Adrian Taylor <adetaylor@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.14 -> 1.0.15"
+notes = "No changes relevant to any of these criteria."
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.unicode-ident]]
+who = "Liza Burakova <liza@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.15 -> 1.0.16"
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.unicode-ident]]
+who = "Daniel Cheng <dcheng@chromium.org>"
+criteria = "safe-to-deploy"
+delta = "1.0.16 -> 1.0.18"
+notes = "Only minor comment and documentation updates."
+aggregated-from = "https://chromium.googlesource.com/chromium/src/+/main/third_party/rust/chromium_crates_io/supply-chain/audits.toml?format=TEXT"
+
+[[audits.google.audits.void]]
+who = "George Burgess IV <gbiv@google.com>"
+criteria = "safe-to-deploy"
+version = "1.0.2"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[[audits.mozilla.audits.num]]
+who = "Josh Stone <jistone@redhat.com>"
+criteria = "safe-to-deploy"
+version = "0.4.0"
+notes = "All code written or reviewed by Josh Stone."
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.num-complex]]
+who = "Josh Stone <jistone@redhat.com>"
+criteria = "safe-to-deploy"
+version = "0.4.2"
+notes = "All code written or reviewed by Josh Stone."
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.num-rational]]
+who = "Josh Stone <jistone@redhat.com>"
+criteria = "safe-to-deploy"
+version = "0.4.1"
+notes = "All code written or reviewed by Josh Stone."
+aggregated-from = "https://hg.mozilla.org/mozilla-central/raw-file/tip/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.quote]]
+who = "Jan-Erik Rediger <jrediger@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.40 -> 1.0.45"
+aggregated-from = "https://raw.githubusercontent.com/mozilla/glean/main/supply-chain/audits.toml"
+
+[[audits.mozilla.audits.quote]]
+who = "Jan-Erik Rediger <jrediger@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "1.0.45 -> 1.0.47"
+aggregated-from = "https://raw.githubusercontent.com/mozilla/glean/main/supply-chain/audits.toml"

@@ -12,3 +12,39 @@ url = "https://raw.githubusercontent.com/google/rust-crate-audits/main/audits.to
 
 [imports.mozilla]
 url = "https://raw.githubusercontent.com/mozilla/supply-chain/main/audits.toml"
+
+[[exemptions.either]]
+version = "1.18.0"
+criteria = "safe-to-run"
+
+[[exemptions.itertools]]
+version = "0.13.0"
+criteria = "safe-to-run"
+
+[[exemptions.num-integer]]
+version = "0.1.47"
+criteria = "safe-to-run"
+
+[[exemptions.num-iter]]
+version = "0.1.46"
+criteria = "safe-to-run"
+
+[[exemptions.proc-macro2]]
+version = "1.0.107"
+criteria = "safe-to-deploy"
+
+[[exemptions.syn]]
+version = "2.0.119"
+criteria = "safe-to-deploy"
+
+[[exemptions.syn]]
+version = "3.0.4"
+criteria = "safe-to-deploy"
+
+[[exemptions.thiserror]]
+version = "2.0.20"
+criteria = "safe-to-deploy"
+
+[[exemptions.thiserror-impl]]
+version = "2.0.20"
+criteria = "safe-to-deploy"
